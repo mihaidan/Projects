@@ -1,0 +1,3 @@
+Instructions:
+	In order to run the .py file, simply type:
+	"python groupProj2.py"

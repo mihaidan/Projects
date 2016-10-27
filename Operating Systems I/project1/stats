@@ -1,0 +1,250 @@
+#!/bin/bash
+
+# Program Name: stats
+# Author:	Mihai Dan
+# Date:		10/14/2015
+# Class: 	CS 344
+
+# Declaring the variable for the
+# first parameter and the first
+# letter of it.
+par1="par1"
+firstletter1="hi"
+
+# Checking if the number of parameters is
+# greater than two or less than one.
+if [ $# -gt 2 ] || [ $# -lt 1 ]
+	then
+		# If wrong number of parameters is entered, exit.
+		>&2 echo "Please input the correct amount of parameters (1 or 2) and try again."
+		exit 1
+	else
+		echo "Correct number of parameters entered."
+fi
+
+# Checking if the first argument is valid.
+if [ $1 ]
+	then
+		# Assign the first parameter to par1
+		par1="$1"
+		# Assign the first two characters from
+		# par1 to firstletter1
+		firstletter1=${par1:0:2}
+		
+		# Display what they have chosen,
+		# exit if input is wrong.
+		if [[ $firstletter1 == '-c' ]]
+			then
+				echo "You have entered columns!"
+		elif [[ $firstletter1 == '-r' ]]
+			then
+				echo "You have entered rows!"
+			else
+				# Exit if the first argument is wrong.
+				>&2 echo "The first argument is wrong. Choose either -rows or -columns."
+				exit 1
+		fi
+	else
+		# Exit statement if there is no
+		# first parameter entered.
+		>&2 echo "First parameter does not exist."
+		exit 1
+fi
+
+# Assigning a tempfile variable
+tempfile="danm.$$"
+# Set the trap for the tempfiles.
+trap 'rm -f $tempfile*; exit 0' INT HUP TERM
+# Declaring inputFilePath
+inputFilePath="UNKNOWN"
+
+# Checking if there was a second argument.
+if [ $2 ]
+	then
+		echo "File was found succesfully."
+		# If there is, set inputFilePath equal to it.
+		inputFilePath=$2
+	else
+		# If there is no second argument, allow the
+		# user to input numbers through stdin.
+		cat > $tempfile
+		inputFilePath=$tempfile
+fi
+
+# Declare x and y for the
+# following while loops.
+x=1
+y=1
+
+# Set variable to count how
+# many numbers are in a col/row.
+lines=0
+
+# If the first parameter matches -r,
+# send each row into its own tempfile.
+if [[ $firstletter1 == '-r' ]] 
+	then
+		while read line; do
+			# Puts each line into a tempfile, replacing
+			# space with a newline, putting them in columns.
+			echo $line | tr ' ' '\n' >> "$tempfile.$x"
+			# Incremenet x and lines.
+			x=$((x+1))
+			lines=$((lines+1))
+		# Get numbers from input file.
+		done < $inputFilePath
+# If the first paramater matches -c, send each row into
+# its own file, replacing ' ' with '\n'. While that loop
+# runs, the inner loop is taking the characters from each
+# line and putting them in separate files. This separates
+# the columns into separate files.
+elif [[ $firstletter1 == '-c' ]]
+	then
+		while read line; do
+			# Reset y for each iteration.
+			y=1
+			# Puts each line into a tempfile, replacing
+			# space with a newline, putting them in columns.
+			echo $line | tr ' ' '\n' >> $tempfile.0.$x
+			# Reads first line from each $tempfile.$x and puts
+			# it in a different temp file, therefore saving the
+			# columns in each $tempfile.0.$y
+			while read line; do
+				echo $line >> $tempfile.$y
+				y=$((y+1))
+				lines=$y
+			# Get numbers from tempfiles with rows in them.
+			done < $tempfile.0.$x
+			# Incremenet lines and x.
+			x=$((x+1))
+		# Get numbers from input file.
+		done < $inputFilePath
+	else
+		# If it's neither, quit.
+		>&2 echo "Failed."
+		exit 1
+fi
+
+# Declare variables:
+# count - used to complete the loop
+# total - used for averages
+# col - number of columns
+count=1
+total=0
+col=0
+
+# Decide whether -r or -c was entered,
+# and proceed with averages accordingly.
+if [[ $firstletter1 == '-r' ]]
+	then
+		echo -e "\nAverages:"
+		lines=$((lines+1))
+		# While count is less than lines...
+		while [ $count -lt $lines ]; do
+			# Reset total for each iteration.
+			total=0
+			# Set the number of lines in tempfile
+			# equal to col.
+			col=`wc -l < $tempfile.$count`
+			# Taking the numbers in a column from the file...
+			for i in $( awk '{ print $1; }' $tempfile.$count )
+				do
+					# ...add them together to get
+					# the total for that specific line.
+					total=$(echo $total+$i | bc )
+				done
+			# Multiply total by 10.
+			total=$((total*10))
+			# Set av equal to total divided by col.
+			av=`expr $total / $col`
+			# Get right-most number from av, and
+			# if it is greaten than 4, add 5 to
+			# av. This will round the average correctly.
+			if [ "${av:-1}" -gt 4 ]
+				then
+					av=$((av+5))
+			fi
+			# Print out average divided by 10,
+			# changing '\n' with '\t'
+			expr $av / 10 | tr '\n' '\t'
+			# Increment count.
+			((count++))	
+		done
+# Same process as above for columns.
+elif [[ $firstletter1 == '-c' ]]
+	then
+		echo -e "\nAverages:"
+		while [ $count -lt $lines ]; do
+			total=0
+			col=`wc -l < $tempfile.$count`
+			for i in $( awk '{ print $1; }' $tempfile.$count )
+				do
+					total=$(echo $total+$i | bc )
+				done
+			total=$((total*10))
+			av=`expr $total / $col`
+			if [ "${av:-1}" -gt 4 ]
+				then
+					av=$((av+5))
+			fi
+
+			expr $av / 10 | tr '\n' '\t'
+			((count++))
+		done
+fi
+
+# Declare variables:
+# count - used to complete the loop
+# length - how many numbers are in file
+# med - the file midpoint
+# numrows - number of rows/columns
+count=1
+length=0
+med=0
+numrows=0
+
+# Decide whether -r or -c was entered,
+# and proceed with median accordingly.
+if [[ $firstletter1 == '-r' ]]
+	then
+		echo -e "\nMedians:"
+		# While count is less than lines...
+		while [ $count -lt $lines ]; do
+			# Set length equal to the number
+			# of lines in specified tempfile.
+			length=`wc -l < $tempfile.$count`
+			# Find midpoint by diving length by 2.
+			med=`expr $length / 2`
+
+			# Incremenet med because if it is...
+			# -even, the larger number is desired.
+			# -odd, the number will not be rounded up.
+			((med++))
+
+			# sort specified tempfile | cut from head up to med |
+			# cut everything but 1 from the tail | change newline
+			# to tab
+			sort -n $tempfile.$count | head -n "$med" | tail -n 1 | tr '\n' '\t'
+			((count++))
+		done			
+# Same process as above for columns.
+elif [[ $firstletter1 == '-c' ]]
+	then
+		echo -e "\nMedians:"
+		while [ $count -lt $lines ]; do
+			length=`wc -l < $tempfile.$count`
+			med=`expr $length / 2`
+			
+			((med++))
+	
+			sort -n $tempfile.$count | head -n "$med" | tail -n 1 | tr '\n' '\t'
+			((count++))
+		done
+fi
+
+# An extra newline for asthetic purposes.
+echo -e "\n"
+
+# Trap clean-up statement.
+rm -f $tempfile*
+exit 0

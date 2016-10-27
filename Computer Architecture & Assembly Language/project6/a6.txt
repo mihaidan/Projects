@@ -1,0 +1,193 @@
+Mihai Dan
+CS 271-001
+3/13/2015
+Assignment 6
+
+1.) Convert 01000001001011000000000000000000 to decimal
+First, split up the number into three groups, sign bit (1),
+exponent bits (following 8), and Mantissa bits (last 23).
+This makes 0  10000010  01011000000000000000000. The 
+first number is 0, so the decimal will be positive. Get
+the exponent by doing 130 (10000010) - 127 = 3. Now 
+convert the Mantissa string into base ten. This yields
+0*(2^-1) + 1*(2^-2) + 0*(2^-3) + 1*(2^-4) + 1*(2^-5)
++ 0*(2^-6) + ... The rest of the 0's will not be shown.
+This gives a decimal number of 0.34375. After these values
+are obtain, they are placed in this equation:
+(-1)^(sign bit) x (1 + Mantissa) x 2^(exponent)
+This gives
+(-1)^(0) x (1 + 0.34375) x 2^(3)
+The decimal approximation is 10.75
+
+
+2.) Convert -76.025 to IEEE.754
+Since -76.025 is a negative number, the first
+digit, also known as the sign bit, will be 1. 
+
+To find the fraction part of the number, write
+76.025 in base two scientific notation,
+meanning a number between 1 and 2.
+76.025 / 2^(1) = 38.013
+76.025 / 2^(2) = 19.006
+76.025 / 2^(3) = 9.503
+76.025 / 2^(4) = 4.752
+76.025 / 2^(5) = 2.376
+
+76.025 / 2^(6) = 1.187890625
+
+Once you have the number, ignore the decimal
+and multily the number by two to get the 
+binary representation. This is shown
+below:
+1.  0.187890625 x 2 = 0.375781250  -->  0 
+2.  0.375781250 x 2 = 0.7515625   -->  0
+3.  0.7515625 x 2 = 1.503125   -->  1
+4.  0.503125 x 2 = 1.00625   -->  1
+5.  0.00625 x 2 = 0.0125   -->  0
+6.  0.0125 x 2 = 0.025  -->  0
+7.  0.025 x 2 = 0.05  -->  0 
+8.  0.05 x 2 = 0.1   -->  0
+9.  0.1 x 2 = 0.2   -->  0
+10. 0.2 x 2 = 0.4   -->  0
+11. 0.4 x 2 = 0.8   -->  0
+12. 0.8 x 2 = 1.6   -->  1
+13. 0.6 x 2 = 1.2   -->  1
+14. 0.2 x 2 = 0.4   -->  0
+15. 0.4 x 2 = 0.8   -->  0
+16. 0.8 x 2 = 1.6   -->  1
+17. 0.6 x 2 = 1.2   -->  1
+18. 0.2 x 2 = 0.4   -->  0
+19. 0.4 x 2 = 0.8   -->  0
+20. 0.8 x 2 = 1.6   -->  1
+21. 0.6 x 2 = 1.2   -->  1
+22. 0.2 x 2 = 0.4   -->  0
+23. 0.4 x 2 = 0.8   -->  0
+24. 0.8 x 2 = 1.6   -->  1
+25. 0.6 x 2 = 1.2   -->  1
+26. 0.2 x 2 = 0.4   -->  0
+27. 0.4 x 2 = 0.8   -->  0
+28. 0.8 x 2 = 1.6   -->  1
+29. 0.6 x 2 = 1.2   -->  1
+30. 0.2 x 2 = 0.4   -->  0
+31. 0.4 x 2 = 0.8   -->  0
+32. 0.8 x 2 = 1.6   -->  1
+33. 0.6 x 2 = 1.2   -->  1
+34. 0.2 x 2 = 0.4   -->  0
+35. 0.4 x 2 = 0.8   -->  0
+36. 0.8 x 2 = 1.6   -->  1
+37. 0.6 x 2 = 1.2   -->  1
+38. 0.2 x 2 = 0.4   -->  0
+39. 0.4 x 2 = 0.8   -->  0
+40. 0.8 x 2 = 1.6   -->  1
+41. 0.6 x 2 = 1.2   -->  1
+42. 0.2 x 2 = 0.4   -->  0
+43. 0.4 x 2 = 0.8   -->  0
+44. 0.8 x 2 = 1.6   -->  1
+45. 0.6 x 2 = 1.2   -->  1
+46. 0.2 x 2 = 0.4   -->  0
+47. 0.4 x 2 = 0.8   -->  0
+48. 0.8 x 2 = 1.6   -->  1
+49. 0.6 x 2 = 1.2   -->  1
+50. 0.2 x 2 = 0.4   -->  0
+51. 0.4 x 2 = 0.8   -->  0
+52. 0.8 x 2 = 1.6   -->  1
+
+Collect the numbers top to bottom and place them in order
+to obtain the fraction part of the number. This looks like:
+0011000000011001100110011001100110011001100110011001
+Add 1 to the fraction number, and the result is
+0011000000011001100110011001100110011001100110011010
+
+Next, turn 76 into a binary number, which is 1001100.
+Since 76 is 1001100, we will use an order of 6.
+Add 6 to the bias, 1023, getting a value of 1029. 
+Converted to binary, 1029 is equivalent to 10000000101. 
+This is to fill the number between the sign bit and 
+fraction. 
+
+The parts are put together to form 
+1100000001010011000000011001100110011001100110011001100110011010
+
+
+3.) Give the IEEE.754 format
+( - represents one bit)
+
+a. Single precision:
+Bias: 127
+1 sign bit |-|
+8 exponent bits |--------|
+23 Mantissa bits |-----------------------|
+
+Put together:
+|-||--------||-----------------------|
+
+
+b. Double precision:
+Bias: 1023
+1 sign bit |-|
+11 exponent bits |-----------|
+52 Mantissa bits |---------------------------------------------------|
+
+Put together:
+|-||-----------||---------------------------------------------------|
+
+The bias on single precision is a constant value, 127, meant
+to keep all 32 bit values between 1 and 254. The bias for
+double precision is 1023, which keeps 64 bit values between
+1 ajd 2046.
+
+
+4.) Steps for passing parameters to a procedure via the stack:
+	1. Push parameter onto stack
+	2. Call to function
+	3. Access value directly from the stack (ebp)
+Passing a parameter to procedure via the stack is fairly simple
+because and item does not get placed off the stack when the
+program switched between procedures. The first item will be
+placed at (ebp), second item at (ebp + 4), etc. Each location
+can store up to 16 bits. In instances such as a floating point,
+pushing a value to stack stores the front of the number in
+(ebp + 4), while the rest of the number is in (ebp).
+
+
+5.) Infix expression: (5 + 3) * 7 + 5
+    Postfix expression: 5 3 + 7 * 5 + 
+
+The postfix notation basically works like the stack. When numbers
+get pushed to the stack, they simply stack. If a mathematical
+operation is passed, the last two numbers on the stack are 
+popped, the operation is performed and the result is pushed back
+on to the stack. In this case, 5 and 3 are pushed, followed by the
+addition sign. 7 is pushed, followed by the multiplication sign,
+which will multiply 7 and the results from the previous
+operation. In the end, 5 is pushed, along with the addition sign.
+This will perform the final addition at the end between the
+remaining two value, pushing the result back on the stack.
+
+
+6.) Infix expression: (((3 * 7) / (2 + 4)) * 5) + 7
+    Postfix expression: 3 7 * 2 4 + / 5 * 7 +
+
+Same process used above, except you have to work your out from
+the paranthesis, starting with 3 7 * and 2 4 +.
+
+
+7.) 16-bit 2s-complement representation of the decimal -378
+
+To find the 2's complement of -378, first find the binary
+equivalent of 378. That is 0000 0001 0111 1010. Invert the digits
+in the binary number, to get 1111 1110 1000 0101. To find
+the 2's complement, simply add one to your current number.
+The answer is 1111111010000110.
+
+
+8.) Explain why passing parameters via registers is insufficient in general.
+
+Passing a parameter via registers requires the programmer
+to push the registers to stack before calling the function.
+This could corrupt the value held in the register, thus not
+being very reliable. Another issue is that you have no idea
+how the registers were altered throghout the function, and
+the value you think might be stored wouldn't be in there.
+To be safe, sticking to passing the parameter via the stack
+is the best option.
